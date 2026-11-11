@@ -110,7 +110,17 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
   Known limit: no login, so anyone who knows the host's participant id could act as host.
 
 ## Deployment and submission (required by the brief)
-- Public GitHub repo + deployed link. Frontend on Vercel, backend on Render.
+- Public GitHub repo + deployed link. DECISION: everything on Vercel, free, no card (Render's dashboard would not
+  load for the user, Railway is not free). Two Vercel projects from this repo (Root Directory backend / frontend).
+- Vercel runs the backend as a serverless function: its disk is read-only except a per-instance /tmp, so a SQLite file
+  would lose data between requests. Production therefore uses free Neon Postgres (Vercel Marketplace sets DATABASE_URL);
+  local development keeps SQLite. app/database_connection.py picks the engine from DATABASE_URL (psycopg 3 driver,
+  postgres:// URLs are rewritten to postgresql+psycopg://, small pool, prepare_threshold=None for Neon's PgBouncer).
+- Postgres could NOT be run on the dev machine (Windows Application Control blocks psycopg's DLL and embedded Postgres),
+  so the Postgres path is verified only by compiling the schema for the Postgres dialect (tests) and by GET /api/health,
+  which answers {status, database} and 503 when DATABASE_URL is wrong. First real check = the deployed /api/health.
+- Startup (create tables + seed) runs in the lifespan; Vercel supports it. Concurrent cold starts can race, so
+  prepare_database() logs and ignores SQLAlchemyError instead of crashing.
 - Deploy a hello-world of both early to shake out CORS/env issues.
 - README: setup instructions, tech stack, assumptions (no auth, no real video, host/guest rule,
   passcode behaviour), plus an ER diagram and table descriptions (DB design is graded).
