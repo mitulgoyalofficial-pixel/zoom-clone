@@ -6,27 +6,8 @@
 # Run (from backend/):  venv\Scripts\python -m pytest tests -v
 # =============================================================================
 
-from app.database_models import Meeting, MeetingStatus, MeetingType, Participant, User, current_utc_time
-
-
-# --- Helpers -----------------------------------------------------------------
-
-# Purpose: Create an instant meeting through the API. Output: the meeting dict (code, passcode ...).
-def create_instant_meeting(api_client) -> dict:
-    return api_client.post("/api/meetings/instant").json()
-
-
-# Purpose: Call the join endpoint. Input: meeting code, display_name and any other body fields.
-# Output: the HTTP response
-def join_meeting(api_client, meeting_code: str, display_name: str = "Alex", **extra_fields):
-    body = {"display_name": display_name, **extra_fields}
-    return api_client.post(f"/api/meetings/{meeting_code}/join", json=body)
-
-
-# Purpose: The names currently in the participants panel of a meeting.
-def list_participant_names(api_client, meeting_code: str) -> list[str]:
-    response = api_client.get(f"/api/meetings/{meeting_code}/participants")
-    return [participant["display_name"] for participant in response.json()["participants"]]
+from app.database_models import Meeting, MeetingStatus, MeetingType, Participant, User
+from meeting_test_helpers import create_instant_meeting, join_meeting, list_participant_names
 
 
 # --- Joining as host ---------------------------------------------------------
@@ -196,14 +177,15 @@ def test_participants_of_an_unknown_meeting_returns_404(api_client):
     assert response.status_code == 404
 
 
-def test_removed_participant_is_hidden_from_the_list_and_told_they_were_removed(api_client, db_session):
+def test_removed_participant_is_hidden_from_the_list_and_told_they_were_removed(api_client):
     meeting = create_instant_meeting(api_client)
     code = meeting["meeting_code"]
     join_meeting(api_client, code, "Mitul", as_host=True)
     guest = join_meeting(api_client, code, "Sam", passcode=meeting["passcode"]).json()
-    # The remove endpoint comes in the next step, so mark the row as removed directly.
-    db_session.get(Participant, guest["id"]).removed_at = current_utc_time()
-    db_session.commit()
+    host = api_client.get(f"/api/meetings/{code}/participants").json()["participants"][0]
+    api_client.delete(
+        f"/api/meetings/{code}/participants/{guest['id']}", params={"host_participant_id": host["id"]}
+    )
 
     response = api_client.get(f"/api/meetings/{code}/participants", params={"participant_id": guest["id"]})
 

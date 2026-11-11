@@ -11,6 +11,7 @@
 #                          the host's own dashboard lists
 #   - ScheduleMeetingRequest: body of the Schedule form (POST .../schedule)
 #   - JoinMeetingRequest, ParticipantResponse, ParticipantListResponse: join flow
+#   - SetMutedRequest: body of the self mute/unmute call
 # =============================================================================
 
 from datetime import datetime
@@ -119,3 +120,8 @@ class ParticipantListResponse(BaseModel):
     meeting_status: MeetingStatus
     participants: list[ParticipantResponse]
     was_removed: bool
+
+
+# Purpose: Body of PATCH .../participants/{id}: a person mutes or unmutes themselves.
+class SetMutedRequest(BaseModel):
+    is_muted: bool

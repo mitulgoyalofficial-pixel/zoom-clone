@@ -6,17 +6,25 @@
 #   - join_meeting()              POST /api/meetings/{code}/join
 #   - leave_meeting()             POST /api/meetings/{code}/leave?participant_id=
 #   - list_active_participants()  GET  /api/meetings/{code}/participants
+#   - set_my_muted_state()        PATCH /api/meetings/{code}/participants/{participant_id}
+#   - mute_all_participants()     POST /api/meetings/{code}/mute-all?host_participant_id=
+#   - remove_participant()        DELETE /api/meetings/{code}/participants/{participant_id}?host_participant_id=
 # =============================================================================
 
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
-from app.api_schemas import JoinMeetingRequest, ParticipantListResponse, ParticipantResponse
+from app.api_schemas import (
+    JoinMeetingRequest,
+    ParticipantListResponse,
+    ParticipantResponse,
+    SetMutedRequest,
+)
 from app.database_connection import get_db_session
 from app.database_models import Meeting, User
 from app.routers.current_user_dependency import load_default_user
 from app.routers.meeting_route_helpers import convert_to_http_error, load_meeting_or_404
-from app.services import participant_service
+from app.services import host_controls_service, participant_service
 from app.services.meeting_errors import MeetingRuleError
 
 router = APIRouter(prefix="/api/meetings/{code}", tags=["participants"])
@@ -79,3 +87,53 @@ def list_active_participants(
         participants=participants,
         was_removed=was_removed,
     )
+
+
+# Purpose: Mute / Unmute button: a person changes their own microphone state.
+# Input:   path participant_id = the person; body SetMutedRequest {is_muted}
+# Output:  ParticipantResponse; 404 if that person is not inside the meeting
+@router.patch("/participants/{participant_id}", response_model=ParticipantResponse)
+def set_my_muted_state(
+    participant_id: int,
+    request: SetMutedRequest,
+    meeting: Meeting = Depends(load_meeting_or_404),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        return participant_service.set_participant_muted(db, meeting, participant_id, request.is_muted)
+    except MeetingRuleError as error:
+        raise convert_to_http_error(error)
+
+
+# Purpose: Host control: "Mute all" (the host stays unmuted).
+# Input:   query host_participant_id = the caller's own participant id
+# Output:  204; 403 if the caller is not the host; 404 if the caller is not inside the meeting
+@router.post("/mute-all", status_code=204)
+def mute_all_participants(
+    host_participant_id: int,
+    meeting: Meeting = Depends(load_meeting_or_404),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        host_controls_service.mute_all_participants(db, meeting, host_participant_id)
+    except MeetingRuleError as error:
+        raise convert_to_http_error(error)
+    return Response(status_code=204)
+
+
+# Purpose: Host control: remove one participant from the meeting.
+# Input:   path participant_id = who to remove; query host_participant_id = the caller
+# Output:  204; 403 if the caller is not the host; 404 if either person is not inside;
+#          400 if the host tries to remove themselves
+@router.delete("/participants/{participant_id}", status_code=204)
+def remove_participant(
+    participant_id: int,
+    host_participant_id: int,
+    meeting: Meeting = Depends(load_meeting_or_404),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        host_controls_service.remove_participant(db, meeting, host_participant_id, participant_id)
+    except MeetingRuleError as error:
+        raise convert_to_http_error(error)
+    return Response(status_code=204)

@@ -5,7 +5,8 @@
 # Contains:
 #   - join_meeting_as_host(), join_meeting_as_guest()
 #   - leave_meeting()
-#   - fetch_active_participants(), has_participant_been_removed()
+#   - fetch_active_participants(), fetch_active_participant(), has_participant_been_removed()
+#   - set_participant_muted(): a person mutes/unmutes themselves
 # Rules in short:
 #   - nobody can join an ended meeting
 #   - the host skips the passcode; guests must give the right one (if any)
@@ -159,3 +160,37 @@ def has_participant_been_removed(db: Session, meeting_id: int, participant_id: i
     if participant is None or participant.meeting_id != meeting_id:
         return False
     return participant.removed_at is not None
+
+
+# Purpose: Find one person who is currently inside a meeting.
+# Input:   db; meeting_id; participant_id
+# Output:  the Participant
+# Errors:  ParticipantNotFoundError if the id does not exist, belongs to another
+#          meeting, or the person already left or was removed
+def fetch_active_participant(db: Session, meeting_id: int, participant_id: int) -> Participant:
+    participant = db.get(Participant, participant_id)
+    # Checking meeting_id stops a participant id from one meeting being used in another.
+    is_active_here = (
+        participant is not None
+        and participant.meeting_id == meeting_id
+        and participant.left_at is None
+        and participant.removed_at is None
+    )
+    if not is_active_here:
+        raise ParticipantNotFoundError("Participant is not in this meeting.")
+    return participant
+
+
+# Purpose: Mute or unmute microphone state of one person (the Mute / Unmute button).
+# Input:   db; meeting; participant_id - the person; is_muted - the new state
+# Output:  the updated Participant
+# Errors:  ParticipantNotFoundError if that person is not inside the meeting
+# How it works: nobody is locked out, so a person muted by "mute all" may unmute
+#   themselves (Zoom lets participants unmute after the host mutes everyone).
+def set_participant_muted(
+    db: Session, meeting: Meeting, participant_id: int, is_muted: bool
+) -> Participant:
+    participant = fetch_active_participant(db, meeting.id, participant_id)
+    participant.is_muted = is_muted
+    db.commit()
+    return participant

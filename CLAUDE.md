@@ -77,8 +77,17 @@ Seeding:
   so the users -> participants relationship is visible in the demo.
 
 ## Backend structure
-backend/app/: main.py (app, CORS, startup), database.py, models.py, schemas.py,
-routers/meetings.py, services/meeting_service.py, seed.py
+backend/app/: main.py (app, CORS, startup), database_connection.py, database_models.py,
+api_schemas.py (Pydantic request/response shapes), app_settings.py (FRONTEND_URL, DEFAULT_USER_ID),
+routers/meetings_router.py, routers/participants_router.py, routers/current_user_router.py,
+routers/current_user_dependency.py, routers/meeting_route_helpers.py (load_meeting_or_404,
+error -> HTTP status table), services/meeting_service.py, services/participant_service.py, services/host_controls_service.py,
+services/meeting_errors.py (MeetingRuleError family; services never raise HTTP errors),
+sample_data_seeder.py. Tests in backend/tests/ (run: venv\Scripts\python -m pytest tests -v).
+- Dev-only packages (pytest, httpx) live in requirements-dev.txt, not requirements.txt.
+- Public GET /meetings/{code} never returns the passcode (has_passcode only); the host's own
+  Upcoming/Recent lists include passcode + invite_link.
+- API datetimes are serialized with a "Z" suffix so the browser reads them as UTC.
 - Env: FRONTEND_URL (CORS origin + invite links), DATABASE_URL (default sqlite:///./zoom.db).
 - requirements.txt must be UTF-8 (PowerShell `>` writes UTF-16, which breaks pip on Linux).
 
@@ -86,10 +95,17 @@ routers/meetings.py, services/meeting_service.py, seed.py
 GET /api/me  GET /api/meetings/upcoming  GET /api/meetings/recent
 POST /api/meetings/instant  POST /api/meetings/schedule  GET /api/meetings/{code}
 POST /api/meetings/{code}/join  (body: display_name, passcode, as_host)
-POST /api/meetings/{code}/leave
-GET /api/meetings/{code}/participants  POST /api/meetings/{code}/mute-all
+POST /api/meetings/{code}/leave?participant_id=  (query param, not body: sendBeacon-friendly;
+  host leaving ends the meeting)
+GET /api/meetings/{code}/participants?participant_id=  (returns meeting_status, participants,
+  was_removed for the asking participant)
+POST /api/meetings/{code}/mute-all?host_participant_id=  (host only; mutes everyone but the host)
 PATCH /api/meetings/{code}/participants/{id}  (self mute/unmute: body is_muted)
-DELETE /api/meetings/{code}/participants/{id}  (host removes participant)
+DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host removes participant;
+  sets removed_at; host cannot remove themselves)
+- Host-only actions: the caller sends their own participant id as host_participant_id; the server
+  checks that row is active in THIS meeting and has role host (403 if not, 404 if not inside).
+  Known limit: no login, so anyone who knows the host's participant id could act as host.
 
 ## Deployment and submission (required by the brief)
 - Public GitHub repo + deployed link. Frontend on Vercel, backend on Render.
@@ -109,6 +125,35 @@ DELETE /api/meetings/{code}/participants/{id}  (host removes participant)
   How it works (use # in Python, // or /* */ in TS; not docstrings).
 - Function names must be self-explanatory (e.g. round_up_to_next_half_hour, not next_hh).
 - Every key decision: a single-line comment on the line above it explaining why.
+
+## Naming and coding practices (from naming_conventions_and_coding_practices.pdf)
+Naming:
+- File names say what is inside (database_models.py, not models.py). Python files snake_case;
+  React components PascalCase (MeetingCard.tsx); other TS files camelCase (apiClient.ts).
+- Casing: Python snake_case / PascalCase classes / UPPER_SNAKE_CASE constants;
+  TS camelCase / PascalCase types and components / UPPER_SNAKE_CASE constants.
+- Variables are nouns; collections plural; booleans read as questions (is_muted, has_passcode,
+  can_join); units in names (duration_minutes, timeout_ms); no magic numbers (named constants).
+- Functions start with a verb and do one job. Prefixes: get_ = cheap, no I/O; fetch_/load_ = DB
+  or network; calculate_ = real computation; to_ = conversion; is_/has_/can_ = returns bool.
+  A name needing "and" means split the function.
+- Avoid noise words (data, info, manager, handler, obj, temp) and abbreviations (except id, url).
+- One word per concept everywhere: always "meeting" (not room/session), "participant"
+  (not attendee/member), "fetch" for DB reads.
+Practices:
+- KISS and YAGNI: simplest thing that works; no abstractions for imagined needs.
+- Guard clauses and early returns instead of deep nesting.
+- Functions ~20-30 lines max, 3-4 parameters max, no boolean flag parameters where avoidable.
+- DRY, but only extract after the pattern appears 3 times.
+- Comments explain WHY (plus the Purpose/Input/Output blocks above); no commented-out code.
+- Errors: validate at the API boundary, raise HTTPException with a clear message
+  (what went wrong + what to do), catch specific exceptions only, never `except: pass`.
+- Security: never trust input (Pydantic validation), SQLAlchemy parameterised queries only
+  (never f-string SQL), secrets via env vars.
+- Performance: no queries inside loops (N+1); use joins / selectinload when listing.
+- Tests: pytest, descriptive names (test_join_fails_when_passcode_is_wrong),
+  Arrange-Act-Assert, in-memory SQLite so tests are fast and independent.
+- Small focused commits with imperative messages.
 
 ## Working rules
 - Work in small steps; after each step, tell me what changed and how to run/test it.
