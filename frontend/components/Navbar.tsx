@@ -9,6 +9,7 @@
 import Link from "next/link";
 
 import HeaderActions from "@/components/HeaderActions";
+import SidebarToggleButton from "@/components/SidebarToggleButton";
 import ZoomLogo from "@/components/ZoomLogo";
 
 // Marketing links on the left; they are placeholders (no pages behind them).
@@ -18,12 +19,15 @@ const MARKETING_LINKS = ["Products", "Solutions", "Resources", "Plans & Pricing"
 // Output:  the <nav> element
 export default function Navbar() {
   return (
-    <nav className="flex h-16 items-center justify-between border-b border-line bg-white px-6">
+    <nav className="flex h-16 items-center justify-between border-b border-line bg-white px-3 sm:px-6">
       <div className="flex items-center">
+        {/* Below 1024px the sidebar is a drawer; this button opens it. */}
+        <SidebarToggleButton />
         <Link href="/" aria-label="Zoom home">
           <ZoomLogo />
         </Link>
-        <ul className="ml-9 flex items-center gap-[38px]">
+        {/* The marketing links need the room of a large screen. */}
+        <ul className="ml-9 hidden items-center gap-[38px] lg:flex">
           {MARKETING_LINKS.map((label) => (
             <li key={label}>
               <button type="button" className="text-base text-ink/75 hover:text-zoom-blue">

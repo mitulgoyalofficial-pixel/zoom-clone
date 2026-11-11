@@ -11,9 +11,10 @@
 // Output:  the row; rows are ~52px apart like Zoom's
 export default function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="mt-5 flex items-start text-[15px]">
-      <div className="w-[160px] shrink-0">{label}</div>
-      <div className="min-w-0 flex-1">{children}</div>
+    // Label above the value on phones, side by side (160px label column) from 640px.
+    <div className="mt-5 flex flex-col items-start text-[15px] sm:flex-row">
+      <div className="mb-0.5 w-full shrink-0 text-ink-muted sm:mb-0 sm:w-[160px] sm:text-ink">{label}</div>
+      <div className="w-full min-w-0 flex-1">{children}</div>
     </div>
   );
 }

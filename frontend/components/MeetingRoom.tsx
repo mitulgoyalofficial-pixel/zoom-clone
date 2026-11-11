@@ -244,8 +244,9 @@ function RoomContent({ meetingCode, session }: { meetingCode: string; session: M
             <p className="p-6 text-white/60">Joining the meeting...</p>
           ) : (
             <div
-              className="grid size-full auto-rows-fr gap-2"
-              style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+              // One column on phones; from 640px the column count follows the number of people (set through a CSS variable).
+              className="grid size-full grid-cols-1 auto-rows-fr gap-2 sm:[grid-template-columns:repeat(var(--column-count),minmax(0,1fr))]"
+              style={{ "--column-count": columnCount } as React.CSSProperties}
             >
               {roomState.participants.map((participant) => (
                 <ParticipantTile

@@ -31,13 +31,14 @@ export default function MeetingCard({ meeting }: { meeting: HostMeeting }) {
 
   return (
     <li className="relative flex gap-4 rounded-card border border-line p-4">
-      <div className="flex size-[88px] shrink-0 items-center justify-center rounded-control border border-line">
+      {/* The thumbnail is decoration: hidden on phones to leave the room to the text. */}
+      <div className="hidden size-[88px] shrink-0 items-center justify-center rounded-control border border-line sm:flex">
         <span className="flex size-10 items-center justify-center rounded-control bg-zoom-blue text-white">
           <Video size={22} fill="currentColor" aria-hidden="true" />
         </span>
       </div>
 
-      <div className="min-w-0 pr-8 text-[15px]">
+      <div className="min-w-0 pr-8 pb-5 text-[15px] sm:pb-0">
         <Link href={`/meeting/${meeting.meeting_code}`} className="block truncate font-semibold text-zoom-blue hover:underline">
           {meeting.title}
         </Link>

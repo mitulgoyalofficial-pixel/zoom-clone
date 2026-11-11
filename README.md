@@ -26,7 +26,7 @@ controls. Built as a full-stack assignment: **Next.js** frontend, **FastAPI** ba
 - **Pre-join** (`/join/{id}`): live camera preview (`getUserMedia`), mic and camera toggles, name field, passcode field when needed.
 - **Meeting room** (`/room/{id}`): dark Zoom-style room, bottom control bar (Mute, Video, Participants, Share link, Host tools, End/Leave), participants panel refreshed every 3 seconds.
 - **Host controls**: mute all, remove a participant, end the meeting for everyone. A removed person sees "You were removed", everyone sees "This meeting has ended".
-- Responsive layout is a bonus item and is **not** implemented yet (the design targets laptop widths).
+- **Responsive layout** (phone, tablet, laptop): below 1024px the sidebar becomes a slide-in drawer opened from a hamburger button and the dashboard stacks into one column with the quick actions first; forms and the details page stack their labels above the fields; the Meetings tabs scroll sideways; in the room the control bar shows only the main buttons with short labels on phones and the participants panel covers the stage. Checked at 320, 375, 768, 1024 and 1536 px wide.
 
 ## Run it locally
 

@@ -22,9 +22,9 @@ export default function RoomTopBar({ title }: { title: string }) {
 
       <div className="flex items-center gap-3 text-white/90">
         <ShieldCheck size={20} className="text-green-500" aria-label="Meeting is encrypted" />
-        <Pencil size={18} aria-hidden="true" />
-        <Sparkles size={18} aria-hidden="true" />
-        <span className="h-5 w-px bg-white/20" aria-hidden="true" />
+        <Pencil size={18} className="hidden sm:block" aria-hidden="true" />
+        <Sparkles size={18} className="hidden sm:block" aria-hidden="true" />
+        <span className="hidden h-5 w-px bg-white/20 sm:block" aria-hidden="true" />
         <LayoutGrid size={18} aria-hidden="true" />
       </div>
     </div>

@@ -17,8 +17,8 @@ import { getMeetingEnd, getMeetingStart } from "@/lib/meetingList";
 // Output:  the row; clicking the title opens /meeting/{code}
 export default function MeetingListRow({ meeting }: { meeting: HostMeeting }) {
   return (
-    <li className="flex gap-8 border-b border-line px-4 py-4 last:border-b-0">
-      <p className="w-[240px] shrink-0 text-base font-bold">
+    <li className="flex flex-col gap-1 border-b border-line px-4 py-4 last:border-b-0 sm:flex-row sm:gap-8">
+      <p className="shrink-0 text-base font-bold sm:w-[240px]">
         {formatTimeRange(getMeetingStart(meeting), getMeetingEnd(meeting))}
       </p>
       <div className="min-w-0">

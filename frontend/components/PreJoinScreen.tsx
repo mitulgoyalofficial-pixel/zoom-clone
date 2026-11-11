@@ -161,7 +161,7 @@ function PreJoinForm({ meeting }: { meeting: PublicMeeting }) {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-[920px] gap-10 px-6 py-10 md:grid-cols-[480px_1fr]">
+    <div className="mx-auto grid w-full max-w-[920px] gap-6 px-4 py-6 sm:gap-10 sm:px-6 sm:py-10 md:grid-cols-[480px_1fr]">
       <section>
         <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-card bg-[#1c1c1c] text-white">
           {stream ? (

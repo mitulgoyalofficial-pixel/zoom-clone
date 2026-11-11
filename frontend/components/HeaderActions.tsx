@@ -22,20 +22,21 @@ const LINK_CLASSES = "text-base font-medium text-ink/90 hover:text-zoom-blue";
 // Output:  the group of links
 export default function HeaderActions({ showSupportLink = false }: { showSupportLink?: boolean }) {
   return (
-    <div className="flex items-center gap-7">
+    <div className="flex items-center gap-4 lg:gap-7">
       {showSupportLink && (
-        <button type="button" className={LINK_CLASSES}>
+        <button type="button" className={`hidden sm:block ${LINK_CLASSES}`}>
           Support
         </button>
       )}
-      <Link href="/meeting/schedule" className={LINK_CLASSES}>
+      {/* Progressive reveal: avatar always, Schedule and Join from 768px, the dropdown links from 1024px. */}
+      <Link href="/meeting/schedule" className={`hidden md:block ${LINK_CLASSES}`}>
         Schedule
       </Link>
-      <Link href="/join" className={LINK_CLASSES}>
+      <Link href="/join" className={`hidden md:block ${LINK_CLASSES}`}>
         Join
       </Link>
       {DROPDOWN_LINKS.map((label) => (
-        <button key={label} type="button" className={`flex items-center gap-0.5 ${LINK_CLASSES}`}>
+        <button key={label} type="button" className={`hidden items-center gap-0.5 lg:flex ${LINK_CLASSES}`}>
           {label}
           <ChevronDown size={16} aria-hidden="true" />
         </button>

@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import ChatFab from "@/components/ChatFab";
 import { CurrentUserProvider } from "@/components/CurrentUserProvider";
 import Navbar from "@/components/Navbar";
+import { SidebarDrawerProvider } from "@/components/SidebarDrawerProvider";
 import SidebarNav from "@/components/SidebarNav";
 import TopUtilityBar from "@/components/TopUtilityBar";
 
@@ -20,20 +21,22 @@ import TopUtilityBar from "@/components/TopUtilityBar";
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <CurrentUserProvider>
-      {/* Sticky because Zoom keeps both bars visible while the page scrolls (screenshots 2-3). */}
-      <header className="sticky top-0 z-50">
-        <TopUtilityBar />
-        <Navbar />
-      </header>
-      <div className="flex flex-1">
-        {/* Suspense is required: SidebarNav reads the current path (usePathname), which is only known at
-            request time on dynamic routes like /meeting/[code]. The empty grey column avoids a layout jump. */}
-        <Suspense fallback={<aside className="w-[300px] shrink-0 bg-sidebar" />}>
-          <SidebarNav />
-        </Suspense>
-        <main className="min-w-0 flex-1">{children}</main>
-      </div>
-      <ChatFab />
+      <SidebarDrawerProvider>
+        {/* Sticky because Zoom keeps both bars visible while the page scrolls (screenshots 2-3). */}
+        <header className="sticky top-0 z-50">
+          <TopUtilityBar />
+          <Navbar />
+        </header>
+        <div className="flex flex-1">
+          {/* Suspense is required: SidebarNav reads the current path (usePathname), which is only known at
+              request time on dynamic routes like /meeting/[code]. The empty grey column avoids a layout jump. */}
+          <Suspense fallback={<aside className="hidden w-[300px] shrink-0 bg-sidebar lg:block" />}>
+            <SidebarNav />
+          </Suspense>
+          <main className="min-w-0 flex-1">{children}</main>
+        </div>
+        <ChatFab />
+      </SidebarDrawerProvider>
     </CurrentUserProvider>
   );
 }

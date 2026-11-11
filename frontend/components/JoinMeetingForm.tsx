@@ -57,7 +57,7 @@ export default function JoinMeetingForm() {
   }
 
   return (
-    <div className="mx-auto mt-[72px] flex w-[361px] max-w-full flex-1 flex-col pb-10">
+    <div className="mx-auto mt-10 flex w-[361px] max-w-full flex-1 flex-col px-4 pb-10 sm:mt-[72px] sm:px-0">
       <h1 className="text-center text-[28px] font-bold">Join Meeting</h1>
 
       <form onSubmit={joinMeeting} noValidate className="mt-9">

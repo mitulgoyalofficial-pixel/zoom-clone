@@ -14,7 +14,7 @@ import MeetingDetailsView from "@/components/MeetingDetailsView";
 // Purpose: Render the details page inside the required Suspense boundary.
 export default function MeetingDetailsPage() {
   return (
-    <Suspense fallback={<p className="px-8 pt-8 text-ink-muted">Loading meeting...</p>}>
+    <Suspense fallback={<p className="px-4 pt-6 text-ink-muted sm:px-8 sm:pt-8">Loading meeting...</p>}>
       <MeetingDetailsView />
     </Suspense>
   );

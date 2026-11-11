@@ -16,7 +16,7 @@ import ZoomLogo from "@/components/ZoomLogo";
 // Output:  the <header> element
 export default function SimpleHeader() {
   return (
-    <header className="flex h-16 items-center justify-between border-b border-line bg-white px-6">
+    <header className="flex h-16 items-center justify-between border-b border-line bg-white px-4 sm:px-6">
       <Link href="/" aria-label="Zoom home">
         <ZoomLogo />
       </Link>

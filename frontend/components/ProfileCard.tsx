@@ -31,7 +31,7 @@ export default function ProfileCard() {
   }
 
   return (
-    <Card className="flex items-stretch justify-between">
+    <Card className="flex flex-wrap items-stretch justify-between gap-4">
       <div className="flex items-center gap-4">
         {currentUser ? (
           <Avatar name={currentUser.name} color={currentUser.avatar_color} sizePx={AVATAR_SIZE_PX} className="rounded-[10px]" />

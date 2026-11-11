@@ -18,8 +18,8 @@ interface FormRowProps {
 // Output:  the row; rows are 20px apart (the controls are 32px high, so ~52px per row like Zoom)
 export default function FormRow({ label, isRequired = false, htmlFor, children }: FormRowProps) {
   return (
-    <div className="mt-5 flex items-start">
-      <label htmlFor={htmlFor} className="relative w-[170px] shrink-0 pt-1 text-[15px]">
+    <div className="mt-5 flex flex-col items-start sm:flex-row">
+      <label htmlFor={htmlFor} className="relative mb-1.5 w-full shrink-0 text-[15px] sm:mb-0 sm:w-[170px] sm:pt-1">
         {isRequired && (
           <span className="absolute -left-2.5 text-red-600" aria-hidden="true">
             *
@@ -27,7 +27,7 @@ export default function FormRow({ label, isRequired = false, htmlFor, children }
         )}
         {label}
       </label>
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="w-full min-w-0 flex-1">{children}</div>
     </div>
   );
 }

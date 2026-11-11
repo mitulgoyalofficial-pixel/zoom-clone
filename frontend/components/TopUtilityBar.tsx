@@ -13,7 +13,8 @@ import { Search } from "lucide-react";
 // Output:  the bar element
 export default function TopUtilityBar() {
   return (
-    <div className="flex h-10 items-center justify-end gap-5 bg-utility-bar px-8 text-[15px] text-white">
+    // Hidden on phones: it is marketing links only, and the navbar needs the space.
+    <div className="hidden h-10 items-center justify-end gap-5 bg-utility-bar px-8 text-[15px] text-white md:flex">
       <button type="button" className="flex items-center gap-1.5 hover:underline">
         <Search size={18} aria-hidden="true" />
         Search

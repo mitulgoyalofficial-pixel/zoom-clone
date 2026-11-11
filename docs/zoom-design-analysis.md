@@ -530,6 +530,8 @@ Each component lives in `frontend/components/`.
 - Join page (`/join`), pre-join (`/join/[code]`) and room (`/room/[code]`) are built. Pre-join and the participants panel are
   our own design (no Zoom screenshot); the launch page "Join from Zoom Workplace app" is skipped; host "Leave Meeting" and
   "End Meeting for All" both call leave (the host leaving ends the meeting). Questions 22-25 were decided as recommended.
+- Responsive layout: no mobile screenshots exist, so the rules are ours (see CLAUDE.md, section Responsive rules).
+  Desktop (1536px and wider) is unchanged; below 1024px the sidebar becomes a drawer.
 - Dashboard built from this analysis; verified against the reference at 1536 CSS px wide / 1.25 scale (see components/).
 
 ## 6. Change log

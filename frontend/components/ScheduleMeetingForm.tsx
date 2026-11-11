@@ -43,7 +43,7 @@ export default function ScheduleMeetingForm() {
   const isClient = useIsClient();
 
   return (
-    <div className="px-8 pt-8 pb-14">
+    <div className="px-4 pt-6 pb-14 sm:px-8 sm:pt-8">
       <Link href="/meeting" className="inline-flex items-center gap-1 text-[15px] text-zoom-blue hover:underline">
         <ChevronLeft size={16} aria-hidden="true" />
         Back to Meetings
@@ -140,7 +140,7 @@ function ScheduleFormFields() {
 
       <FormRow label="When" htmlFor="meeting-date">
         <div className="flex flex-wrap gap-3">
-          <div className="w-[240px]">
+          <div className="w-[240px] max-w-full">
             <input
               id="meeting-date"
               type="date"
@@ -173,7 +173,7 @@ function ScheduleFormFields() {
             value={formValues.durationHours}
             options={DURATION_HOUR_OPTIONS}
             onChange={(newValue) => updateField("durationHours", Number(newValue))}
-            widthClass="w-[150px]"
+            widthClass="w-[110px] sm:w-[150px]"
           />
           hr
           <SelectField
@@ -181,7 +181,7 @@ function ScheduleFormFields() {
             value={formValues.durationMinutes}
             options={DURATION_MINUTE_OPTIONS}
             onChange={(newValue) => updateField("durationMinutes", Number(newValue))}
-            widthClass="w-[150px]"
+            widthClass="w-[110px] sm:w-[150px]"
           />
           min
         </div>
@@ -196,7 +196,7 @@ function ScheduleFormFields() {
 
       {/* Visual only: every meeting gets an automatically generated ID. */}
       <FormRow label="Meeting ID">
-        <div className="flex items-center gap-8 pt-1 text-[15px]">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 pt-1 text-[15px]">
           <label className="flex items-center gap-2">
             <input type="radio" name="meeting-id-type" defaultChecked className={CHECKBOX_CLASSES} />
             Generate Automatically
@@ -209,7 +209,7 @@ function ScheduleFormFields() {
       </FormRow>
 
       <FormRow label="Security">
-        <div className="flex items-center gap-3 pt-1 text-[15px]">
+        <div className="flex flex-wrap items-center gap-3 pt-1 text-[15px]">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"

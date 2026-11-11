@@ -151,6 +151,19 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
 - Stopping background servers: killing the task wrapper can leave node/uvicorn running on the port; check with
   `netstat -ano | grep LISTENING` and `taskkill //PID <pid> //F`.
 
+## Responsive rules (built)
+- Tailwind breakpoints: sm 640, md 768, lg 1024, 2xl 1536 (= the reference laptop, so desktop looks as in the screenshots).
+- Below lg: sidebar is a fixed drawer (SidebarDrawerProvider + SidebarToggleButton hamburger in the Navbar), marketing
+  links and the black utility bar are hidden, dashboard is one column (right column first via `order`).
+  HeaderActions reveals links progressively (avatar always, Schedule/Join from md, Host/Web App from lg).
+- Below sm: FormRow/DetailRow stack label over value; sticky details bar wraps and keeps pr-[88px] clear of the chat button.
+- Meetings tabs use overflow-x-auto until 2xl. Room: ControlBarButton has shortLabel and isHiddenOnSmallScreens
+  (Chat/React/More hidden below md); ParticipantsPanel is an absolute full cover below md; stage grid is 1 column below sm.
+- Tailwind order trap: do not combine `hidden` with `flex` on one element; pick the class by condition instead.
+- Verification: a scratch DevTools-protocol script visited every page at 320/375/768/1024/1536 px, checked scrollWidth
+  and offending elements, drawer open/close (button, backdrop, Escape, link), and control-bar buttons inside the screen.
+  Make its checks fail on evaluate() errors (an error object is truthy and would pass silently).
+
 ## UI rules
 - Detailed visual analysis of each Zoom screen (tokens, layout, components) lives in
   docs/zoom-design-analysis.md. Read it before building any UI; screenshots are in design-ref/ (not committed).

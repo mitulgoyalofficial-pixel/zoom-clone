@@ -72,8 +72,8 @@ export default function ControlBar({
   }
 
   return (
-    <div className="relative grid h-[58px] shrink-0 grid-cols-[1fr_auto_1fr] items-center bg-[#0d0d0d] px-4">
-      <div className="flex items-center gap-1">
+    <div className="relative grid h-[58px] shrink-0 grid-cols-[1fr_auto_1fr] items-center bg-[#0d0d0d] px-2 md:px-4">
+      <div className="flex items-center md:gap-1">
         <ControlBarButton
           label={isMuted ? "Unmute" : "Mute"}
           icon={isMuted ? <MicOff size={22} className="text-red-500" /> : <Mic size={22} />}
@@ -89,17 +89,18 @@ export default function ControlBar({
         />
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center md:gap-1">
         <ControlBarButton
           label="Participants"
+          shortLabel="People"
           icon={<Users size={22} />}
           badgeCount={participantCount}
           hasChevron
           isPressed={isParticipantsPanelOpen}
           onClick={onToggleParticipantsPanel}
         />
-        <ControlBarButton label="Chat" icon={<MessageSquare size={22} />} hasChevron />
-        <ControlBarButton label="React" icon={<Heart size={22} />} />
+        <ControlBarButton label="Chat" icon={<MessageSquare size={22} />} hasChevron isHiddenOnSmallScreens />
+        <ControlBarButton label="React" icon={<Heart size={22} />} isHiddenOnSmallScreens />
         <ControlBarButton
           label={hasCopiedShareLink ? "Link copied" : "Share"}
           ariaLabel="Share invite link"
@@ -109,12 +110,13 @@ export default function ControlBar({
         {isHost && (
           <ControlBarButton
             label="Host tools"
+            shortLabel="Host"
             icon={<ShieldCheck size={22} />}
             isPressed={openMenu === "host-tools"}
             onClick={() => toggleMenu("host-tools")}
           />
         )}
-        <ControlBarButton label="More" icon={<Ellipsis size={22} />} />
+        <ControlBarButton label="More" icon={<Ellipsis size={22} />} isHiddenOnSmallScreens />
       </div>
 
       <div className="flex justify-end">

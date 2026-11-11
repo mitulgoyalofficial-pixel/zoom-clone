@@ -34,7 +34,11 @@ export default function ParticipantsPanel({
   onMuteAll,
 }: ParticipantsPanelProps) {
   return (
-    <aside aria-label="Participants" className="flex w-[320px] shrink-0 flex-col border-l border-white/10 bg-[#232323]">
+    // Covers the whole stage on phones; a 320px column beside the stage from 768px.
+    <aside
+      aria-label="Participants"
+      className="absolute inset-0 z-10 flex flex-col bg-[#232323] md:static md:z-auto md:w-[320px] md:shrink-0 md:border-l md:border-white/10"
+    >
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <h2 className="text-[15px] font-semibold">Participants ({participants.length})</h2>
         <button type="button" onClick={onClose} aria-label="Close participants panel" className="rounded p-1 hover:bg-white/10">

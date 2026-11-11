@@ -12,7 +12,8 @@ import { ChevronDown } from "lucide-react";
 // Output:  the <footer> element
 export default function SimpleFooter() {
   return (
-    <footer className="flex items-center justify-center gap-16 pb-6 text-[15px] text-ink-muted">
+    // Stacked and centred on phones, side by side from 640px.
+    <footer className="flex flex-col items-center justify-center gap-2 px-4 pb-6 text-center text-[15px] text-ink-muted sm:flex-row sm:gap-16">
       <p>
         &copy; 2026 Zoom Clone (a learning project). All rights reserved.{" "}
         <button type="button" className="hover:underline">

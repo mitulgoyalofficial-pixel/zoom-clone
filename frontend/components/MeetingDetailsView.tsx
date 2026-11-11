@@ -41,11 +41,11 @@ export default function MeetingDetailsView() {
   const { data: meeting, isLoading, errorMessage } = useApiData(loadMeeting);
 
   if (isLoading) {
-    return <p className="px-8 pt-8 text-ink-muted">Loading meeting...</p>;
+    return <p className="px-4 pt-6 text-ink-muted sm:px-8 sm:pt-8">Loading meeting...</p>;
   }
   if (errorMessage || !meeting) {
     return (
-      <div role="alert" className="px-8 pt-8">
+      <div role="alert" className="px-4 pt-6 sm:px-8 sm:pt-8">
         <p className="text-red-600">{errorMessage ?? "Meeting not found."}</p>
         <Link href="/meeting" className="mt-3 inline-block text-zoom-blue hover:underline">
           Back to My Meetings
@@ -86,8 +86,8 @@ function MeetingDetailsContent({ meeting }: { meeting: HostMeeting }) {
 
   return (
     <>
-      <div className="px-8 pt-8 pb-10">
-        <nav aria-label="Breadcrumb" className="flex items-center text-[15px]">
+      <div className="px-4 pt-6 pb-10 sm:px-8 sm:pt-8">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center text-[15px]">
           <Link href="/meeting" className="text-zoom-blue hover:underline">
             My Meetings
           </Link>
@@ -102,7 +102,7 @@ function MeetingDetailsContent({ meeting }: { meeting: HostMeeting }) {
           </button>
         </div>
 
-        <div className="pl-4">
+        <div className="sm:pl-4">
           <DetailRow label="Topic">{meeting.title}</DetailRow>
           {meeting.description && <DetailRow label="Description">{meeting.description}</DetailRow>}
           <DetailRow label="Time">
@@ -157,7 +157,7 @@ function MeetingDetailsContent({ meeting }: { meeting: HostMeeting }) {
             </div>
           </DetailRow>
 
-          <hr className="mt-6 ml-[160px] border-line" />
+          <hr className="mt-6 border-line sm:ml-[160px]" />
 
           {/* The rows below are fixed text copied from Zoom's page; our database does not store these settings. */}
           <DetailRow label="Encryption">
@@ -184,7 +184,8 @@ function MeetingDetailsContent({ meeting }: { meeting: HostMeeting }) {
       </div>
 
       {/* Sticky: stays at the bottom of the window while the page is long, like Zoom's action bar. */}
-      <div className="sticky bottom-0 flex items-center gap-2.5 border-t border-line bg-white px-8 py-4">
+      {/* pr-[88px] on phones keeps the buttons clear of the floating chat button; the buttons wrap onto a second line. */}
+      <div className="sticky bottom-0 flex flex-wrap items-center gap-2.5 border-t border-line bg-white py-3 pr-[88px] pl-4 sm:px-8 sm:py-4">
         <Link href={`/join/${meeting.meeting_code}?host=1`} className={PRIMARY_BUTTON_CLASSES}>
           Start
         </Link>
@@ -199,7 +200,7 @@ function MeetingDetailsContent({ meeting }: { meeting: HostMeeting }) {
           Delete
         </button>
         {/* Right margin keeps the button clear of the floating chat button. */}
-        <button type="button" className={`${OUTLINE_BUTTON_CLASSES} ml-auto mr-[72px]`}>
+        <button type="button" className={`${OUTLINE_BUTTON_CLASSES} sm:ml-auto sm:mr-[72px]`}>
           Save as Template
         </button>
       </div>

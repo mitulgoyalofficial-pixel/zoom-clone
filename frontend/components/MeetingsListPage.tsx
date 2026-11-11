@@ -28,7 +28,8 @@ const WORKING_TABS: { name: ActiveTab; label: string }[] = [
 // Tabs that Zoom has but this clone does not implement (they do nothing).
 const PLACEHOLDER_TABS = ["Attachments", "Personal Room", "Meeting Templates", "Meeting Agendas"];
 
-const TAB_CLASSES = "-mb-px border-b-2 pb-2.5 text-xl";
+// text-lg below 1536px, text-xl (Zoom's size) from 1536px, where all six tabs fit beside the sidebar.
+const TAB_CLASSES = "shrink-0 border-b-2 pb-2.5 text-lg 2xl:-mb-px 2xl:text-xl";
 
 // Purpose: The visual-only date range box. It shows today to three months ahead, like Zoom's default.
 // Output:  the box (needs the current date, so it is only rendered in the browser)
@@ -38,7 +39,7 @@ function DateRangeBox() {
 
   return (
     <div className="mt-6 flex items-center gap-2">
-      <div className="flex h-8 w-[270px] items-center gap-3 rounded-control border border-ink/50 px-3 text-[15px]">
+      <div className="flex h-8 w-[270px] max-w-full items-center gap-3 rounded-control border border-ink/50 px-3 text-[15px]">
         <CalendarDays size={16} aria-hidden="true" />
         <span>{format(today, dateFormat)}</span>
         <span>to</span>
@@ -56,8 +57,8 @@ export default function MeetingsListPage() {
   const isClient = useIsClient();
 
   return (
-    <div className="px-8 pt-8 pb-14">
-      <div className="flex items-center justify-between">
+    <div className="px-4 pt-6 pb-14 sm:px-8 sm:pt-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Meetings</h1>
         <div className="flex items-center gap-3">
           <button type="button" className="inline-flex h-8 items-center gap-2 rounded-control bg-soft px-3 text-sm hover:brightness-95">
@@ -78,7 +79,8 @@ export default function MeetingsListPage() {
         </div>
       </div>
 
-      <div className="mt-10 flex gap-8 border-b border-line">
+      {/* The six tabs scroll sideways when they do not all fit, instead of wrapping into several lines. */}
+      <div className="mt-8 flex gap-6 overflow-x-auto border-b border-line whitespace-nowrap sm:mt-10 2xl:gap-8 2xl:overflow-visible">
         {WORKING_TABS.map((tab) => (
           <button
             key={tab.name}
