@@ -9,6 +9,7 @@
 #   - normalize_meeting_code(): "123 4567 8901" -> "12345678901"
 #   - fetch_meeting_by_code(), fetch_upcoming_meetings(), fetch_recent_meetings()
 #   - calculate_scheduled_end_time(), build_invite_link()
+#   - ensure_user_hosts_meeting(), delete_meeting(): host-only actions on one meeting
 #   - to_public_meeting_response(), to_host_meeting_response(): DB object -> API shape
 # =============================================================================
 
@@ -22,7 +23,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.api_schemas import MeetingHostResponse, MeetingPublicResponse, ScheduleMeetingRequest
 from app.app_settings import FRONTEND_URL
 from app.database_models import Meeting, MeetingStatus, MeetingType, User, current_utc_time
-from app.services.meeting_errors import InvalidMeetingRequestError
+from app.services.meeting_errors import InvalidMeetingRequestError, NotMeetingHostError
 
 # Letters + digits, like Zoom passcodes (e.g. "aB3xY9").
 PASSCODE_ALPHABET = string.ascii_letters + string.digits
@@ -229,3 +230,22 @@ def to_host_meeting_response(meeting: Meeting) -> MeetingHostResponse:
         passcode=meeting.passcode,
         invite_link=build_invite_link(meeting),
     )
+
+
+# Purpose: Refuse an action that only the meeting's host may do.
+# Input:   meeting - the meeting; user - the logged-in user
+# Output:  none; raises NotMeetingHostError if the user is not this meeting's host
+def ensure_user_hosts_meeting(meeting: Meeting, user: User) -> None:
+    if meeting.host_id != user.id:
+        raise NotMeetingHostError("Only the host of this meeting can do this.")
+
+
+# Purpose: Delete a meeting (the details page "Delete" button).
+# Input:   db - open session; meeting - the meeting; user - the logged-in user (must be the host)
+# Output:  none
+# Errors:  NotMeetingHostError if the user is not the host
+# How it works: deleting the meeting row also deletes its participants (ON DELETE CASCADE).
+def delete_meeting(db: Session, meeting: Meeting, user: User) -> None:
+    ensure_user_hosts_meeting(meeting, user)
+    db.delete(meeting)
+    db.commit()

@@ -99,6 +99,8 @@ POST /api/meetings/{code}/leave?participant_id=  (query param, not body: sendBea
   host leaving ends the meeting)
 GET /api/meetings/{code}/participants?participant_id=  (returns meeting_status, participants,
   was_removed for the asking participant)
+GET /api/meetings/{code}/details  (host only: passcode + invite link; 403 for others)
+DELETE /api/meetings/{code}  (host only; participants are removed by the database cascade)
 POST /api/meetings/{code}/mute-all?host_participant_id=  (host only; mutes everyone but the host)
 PATCH /api/meetings/{code}/participants/{id}  (self mute/unmute: body is_muted)
 DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host removes participant;
@@ -120,8 +122,15 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
 - Folders: app/(site)/ = pages with the Zoom website shell (navbar, sidebar); app/(meeting)/ = full-screen
   meeting pages without it; components/; hooks/useApiData.ts (loading/error/data hook); lib/apiClient.ts,
   lib/apiTypes.ts, lib/formatters.ts.
-- Routes: `/` dashboard, `/meeting/schedule` schedule form (to build), `/join` join by ID (to build),
-  `/join/[code]` pre-join (invite-link target; `?host=1` = join as host, `?pwd=` = passcode), `/meeting/[code]` room (to build).
+- Routes: `/` dashboard, `/meeting` meetings list (built), `/meeting/schedule` schedule form (built),
+  `/join` join by ID (to build),
+  `/join/[code]` pre-join (invite-link target; `?host=1` = join as host, `?pwd=` = passcode),
+  `/meeting/[code]` meeting details page like Zoom's zoom.us/meeting/{id} (built), `/room/[code]` live room (to build; proposed).
+- Pages that depend on "now" (today's date, next half hour) must render those parts only in the browser
+  (hooks/useIsClient.ts), otherwise the build-time value is frozen into the prerendered page.
+- Components that call usePathname/useParams/useSearchParams need a <Suspense> boundary on dynamic routes
+  (SidebarNav is wrapped in app/(site)/layout.tsx). Tailwind's reset removes a <dialog>'s centring: keep `m-auto` in Modal.
+- Inter's "calt" feature is disabled in globals.css: it drew an x between digits as a multiplication sign (passcode 9x21Vu showed as 9×21Vu).
 - Next.js 16 notes (read node_modules/next/dist/docs before using unfamiliar APIs): next.config has
   cacheComponents + partialPrefetching. useParams / useSearchParams must be inside a <Suspense> boundary or the
   build fails. Navigation keeps old routes mounted but hidden: effects re-run when a page is shown again

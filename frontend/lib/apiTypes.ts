@@ -3,7 +3,7 @@
 // Purpose: TypeScript shapes of the JSON the FastAPI backend sends and receives.
 //          They mirror backend/app/api_schemas.py one to one, so a field that
 //          changes there must change here too.
-// Contains: User, PublicMeeting, HostMeeting (+ the small string unions they use)
+// Contains: User, PublicMeeting, HostMeeting, ScheduleMeetingRequest (+ the small string unions they use)
 // =============================================================================
 
 export type MeetingType = "instant" | "scheduled";
@@ -39,4 +39,14 @@ export interface PublicMeeting {
 export interface HostMeeting extends PublicMeeting {
   passcode: string | null;
   invite_link: string;
+}
+
+// Body of POST /api/meetings/schedule (the Schedule form).
+// scheduled_start must be an ISO date-time WITH a time zone, e.g. new Date(...).toISOString().
+export interface ScheduleMeetingRequest {
+  title: string;
+  description: string | null;
+  scheduled_start: string;
+  duration_minutes: number; // 1 to 1440
+  has_passcode: boolean;
 }

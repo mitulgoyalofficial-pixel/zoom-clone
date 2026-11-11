@@ -32,6 +32,8 @@
   --color-notice-bg: #fff9f0;
   --color-notice-border: #f0d3a8;
   --color-badge-new: #e6eeff;
+  --color-upgrade-bg: #e4f7ff; /* "Upgrade to Pro" pill in the sidebar */
+  --color-upgrade-border: #7fd3f0;
 
   /* Shape */
   --radius-card: 12px;
@@ -50,4 +52,7 @@ body {
   font-family: var(--font-sans);
   /* Base size 16px (analysis section 1). */
   font-size: 16px;
+  /* Inter's contextual alternates draw an "x" between digits as "×", which would misrepresent passcodes
+     and invite links (9x21Vu showed as 9×21Vu). Turn that feature off. */
+  font-feature-settings: "calt" 0;
 }

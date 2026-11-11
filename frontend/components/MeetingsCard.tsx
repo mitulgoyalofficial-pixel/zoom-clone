@@ -9,6 +9,8 @@
 // Source: docs/zoom-design-analysis.md section 3.1-H
 // =============================================================================
 
+import Link from "next/link";
+
 import Card from "@/components/Card";
 import UpcomingMeetingItem from "@/components/UpcomingMeetingItem";
 import { useApiData } from "@/hooks/useApiData";
@@ -23,9 +25,9 @@ export default function MeetingsCard() {
     <Card>
       <div className="flex items-baseline justify-between">
         <h2 className="text-[26px] font-bold">Meetings</h2>
-        <button type="button" className="text-[15px] text-zoom-blue hover:underline">
+        <Link href="/meeting" className="text-[15px] text-zoom-blue hover:underline">
           Visit Meetings
-        </button>
+        </Link>
       </div>
 
       {isLoading && <p className="mt-4 text-ink-muted">Loading meetings...</p>}

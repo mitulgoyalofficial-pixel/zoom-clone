@@ -6,6 +6,8 @@
 //       meeting room lives outside this group so it does not get this shell.
 // =============================================================================
 
+import { Suspense } from "react";
+
 import ChatFab from "@/components/ChatFab";
 import { CurrentUserProvider } from "@/components/CurrentUserProvider";
 import Navbar from "@/components/Navbar";
@@ -24,7 +26,11 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
       </header>
       <div className="flex flex-1">
-        <SidebarNav />
+        {/* Suspense is required: SidebarNav reads the current path (usePathname), which is only known at
+            request time on dynamic routes like /meeting/[code]. The empty grey column avoids a layout jump. */}
+        <Suspense fallback={<aside className="w-[300px] shrink-0 bg-sidebar" />}>
+          <SidebarNav />
+        </Suspense>
         <main className="min-w-0 flex-1">{children}</main>
       </div>
       <ChatFab />

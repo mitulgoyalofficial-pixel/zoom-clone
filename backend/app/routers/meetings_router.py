@@ -8,11 +8,13 @@
 #   - list_upcoming_meetings()  GET /api/meetings/upcoming
 #   - list_recent_meetings()    GET /api/meetings/recent
 #   - get_meeting_by_code()     GET /api/meetings/{code}
+#   - get_meeting_details()     GET /api/meetings/{code}/details  (host only: passcode + invite link)
+#   - delete_meeting()          DELETE /api/meetings/{code}       (host only)
 # Note: /upcoming and /recent are declared BEFORE /{code}, otherwise FastAPI
 #   would treat the words "upcoming" and "recent" as meeting codes.
 # =============================================================================
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.api_schemas import MeetingHostResponse, MeetingPublicResponse, ScheduleMeetingRequest
@@ -78,3 +80,32 @@ def list_recent_meetings(db: Session = Depends(get_db_session)):
 @router.get("/{code}", response_model=MeetingPublicResponse)
 def get_meeting_by_code(meeting: Meeting = Depends(load_meeting_or_404)):
     return meeting_service.to_public_meeting_response(meeting)
+
+
+# Purpose: The meeting details page: everything about one meeting, including the passcode
+#   and the invite link, which the public lookup above hides on purpose.
+# Input:   code - meeting ID in the URL
+# Output:  MeetingHostResponse; 403 if the logged-in user is not the host; 404 if no such meeting
+@router.get("/{code}/details", response_model=MeetingHostResponse)
+def get_meeting_details(meeting: Meeting = Depends(load_meeting_or_404), host: User = Depends(load_default_user)):
+    try:
+        meeting_service.ensure_user_hosts_meeting(meeting, host)
+    except MeetingRuleError as error:
+        raise convert_to_http_error(error)
+    return meeting_service.to_host_meeting_response(meeting)
+
+
+# Purpose: The details page "Delete" button.
+# Input:   code - meeting ID in the URL
+# Output:  204 No Content; 403 if the logged-in user is not the host; 404 if no such meeting
+@router.delete("/{code}", status_code=204)
+def delete_meeting(
+    meeting: Meeting = Depends(load_meeting_or_404),
+    host: User = Depends(load_default_user),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        meeting_service.delete_meeting(db, meeting, host)
+    except MeetingRuleError as error:
+        raise convert_to_http_error(error)
+    return Response(status_code=204)

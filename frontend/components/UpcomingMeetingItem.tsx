@@ -23,7 +23,9 @@ export default function UpcomingMeetingItem({ meeting }: { meeting: HostMeeting 
         <p className="text-sm text-ink-muted">
           {startLabel} · {formatDuration(meeting.duration_minutes)}
         </p>
-        <p className="truncate font-semibold">{meeting.title}</p>
+        <Link href={`/meeting/${meeting.meeting_code}`} className="block truncate font-semibold hover:text-zoom-blue hover:underline">
+          {meeting.title}
+        </Link>
         <p className="text-sm text-ink-muted">Meeting ID {formatMeetingCode(meeting.meeting_code)}</p>
       </div>
       <Link

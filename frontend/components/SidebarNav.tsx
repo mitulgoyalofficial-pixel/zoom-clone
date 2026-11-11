@@ -9,12 +9,13 @@
 // Source: docs/zoom-design-analysis.md section 3.1-C and 3.2
 // =============================================================================
 
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronRight, ExternalLink, Star } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 interface ProductItem {
   label: string;
+  href?: string; // set only for items that lead to a page of this app
   showsNewBadge?: boolean;
   opensExternalProduct?: boolean; // shows the small "open in new tab" icon
 }
@@ -22,7 +23,7 @@ interface ProductItem {
 // Static list, same order as Zoom's sidebar. "Meetings" is the highlighted item on the schedule page.
 const PRODUCT_ITEMS: ProductItem[] = [
   { label: "AI", showsNewBadge: true, opensExternalProduct: true },
-  { label: "Meetings" },
+  { label: "Meetings", href: "/meeting" },
   { label: "Recordings" },
   { label: "Summaries" },
   { label: "Hub", showsNewBadge: true, opensExternalProduct: true },
@@ -95,7 +96,11 @@ export default function SidebarNav() {
       <ul>
         {PRODUCT_ITEMS.map((item) => (
           <li key={item.label}>
-            <SidebarRow label={item.label} isActive={item.label === "Meetings" && pathname.startsWith("/meeting")}>
+            <SidebarRow
+              label={item.label}
+              href={item.href}
+              isActive={item.label === "Meetings" && pathname.startsWith("/meeting")}
+            >
               {item.showsNewBadge && (
                 <span className="mr-2 rounded-full bg-badge-new px-2 py-0.5 text-[11px] text-zoom-blue">New</span>
               )}
@@ -118,6 +123,17 @@ export default function SidebarNav() {
           </li>
         ))}
       </ul>
+
+      {/* Zoom shows this upsell pill on every Meetings page (schedule, details, list). Decoration only. */}
+      {pathname.startsWith("/meeting") && (
+        <button
+          type="button"
+          className="mx-auto mt-7 flex h-8 w-[146px] items-center justify-center gap-1.5 rounded-full border border-upgrade-border bg-upgrade-bg text-[15px] text-zoom-blue hover:brightness-95"
+        >
+          <Star size={14} fill="currentColor" aria-hidden="true" />
+          Upgrade to Pro
+        </button>
+      )}
     </aside>
   );
 }

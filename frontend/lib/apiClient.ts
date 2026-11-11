@@ -6,11 +6,11 @@
 //   - ApiError: the error thrown for any failed call (carries a user-friendly message)
 //   - sendRequest(): shared fetch + error handling
 //   - fetchCurrentUser, fetchUpcomingMeetings, fetchRecentMeetings, fetchMeetingByCode,
-//     createInstantMeeting
+//     fetchMeetingDetails, createInstantMeeting, scheduleMeeting, deleteMeeting
 // Setup: the backend address comes from NEXT_PUBLIC_API_URL (frontend/.env.local).
 // =============================================================================
 
-import type { HostMeeting, PublicMeeting, User } from "@/lib/apiTypes";
+import type { HostMeeting, PublicMeeting, ScheduleMeetingRequest, User } from "@/lib/apiTypes";
 
 // NEXT_PUBLIC_ prefix makes Next.js copy the value into the browser bundle at build time.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -101,4 +101,25 @@ export function fetchMeetingByCode(meetingCode: string): Promise<PublicMeeting> 
 // Output:  the created meeting with its meeting_code, passcode and invite_link
 export function createInstantMeeting(): Promise<HostMeeting> {
   return sendRequest<HostMeeting>("/api/meetings/instant", "POST");
+}
+
+// Purpose: Load everything about one meeting for the details page, including passcode and invite link.
+// Input:   meetingCode - digits, spaces allowed
+// Output:  the host's view of the meeting; throws ApiError 403 if the user is not the host, 404 if unknown
+export function fetchMeetingDetails(meetingCode: string): Promise<HostMeeting> {
+  return sendRequest<HostMeeting>(`/api/meetings/${encodeURIComponent(meetingCode)}/details`);
+}
+
+// Purpose: Save the Schedule form as a meeting.
+// Input:   request - topic, optional description, start time (ISO with time zone), duration, passcode flag
+// Output:  the saved meeting; throws ApiError 400 (e.g. start time in the past) or 422 (invalid field)
+export function scheduleMeeting(request: ScheduleMeetingRequest): Promise<HostMeeting> {
+  return sendRequest<HostMeeting>("/api/meetings/schedule", "POST", request);
+}
+
+// Purpose: The details page "Delete" button.
+// Input:   meetingCode - the meeting to delete (host only)
+// Output:  nothing; throws ApiError 403 if the user is not the host, 404 if unknown
+export function deleteMeeting(meetingCode: string): Promise<void> {
+  return sendRequest<void>(`/api/meetings/${encodeURIComponent(meetingCode)}`, "DELETE");
 }

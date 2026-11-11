@@ -8,6 +8,7 @@
 // =============================================================================
 
 import { Ellipsis, Video } from "lucide-react";
+import Link from "next/link";
 
 import type { HostMeeting } from "@/lib/apiTypes";
 import { formatMeetingCode, formatMeetingTime } from "@/lib/formatters";
@@ -37,7 +38,9 @@ export default function MeetingCard({ meeting }: { meeting: HostMeeting }) {
       </div>
 
       <div className="min-w-0 pr-8 text-[15px]">
-        <p className="truncate font-semibold text-zoom-blue">{meeting.title}</p>
+        <Link href={`/meeting/${meeting.meeting_code}`} className="block truncate font-semibold text-zoom-blue hover:underline">
+          {meeting.title}
+        </Link>
         <p>Hosted by {meeting.host_name}</p>
         <p>Started {startedLabel}</p>
         <p className="text-ink-muted">Meeting ID {formatMeetingCode(meeting.meeting_code)}</p>
