@@ -1,10 +1,10 @@
 # =============================================================================
-# File: app/database.py
+# File: app/database_connection.py
 # Purpose: Sets up the connection between the app and the SQLite database.
 # Contains:
 #   - engine: the single connection point to the database file
 #   - SessionLocal: factory that creates a new DB session (one unit of work)
-#   - Base: parent class for every ORM model (models.py), so SQLAlchemy can
+#   - Base: parent class for every ORM model (database_models.py), so SQLAlchemy can
 #           find all tables and create them with Base.metadata.create_all()
 #   - get_db_session(): FastAPI dependency giving each request its own session
 # =============================================================================

@@ -1,5 +1,5 @@
 # =============================================================================
-# File: app/models.py
+# File: app/database_models.py
 # Purpose: Defines the database schema as SQLAlchemy ORM classes.
 #          One class = one table, one attribute = one column.
 # Contains:
@@ -31,7 +31,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
+from app.database_connection import Base
 
 
 # Purpose: Get the current time for storing in the database.

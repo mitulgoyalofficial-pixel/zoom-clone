@@ -1,0 +1,4 @@
+# Only needed to run the tests (pytest tests/); the deployed backend does not install these.
+# httpx: required by FastAPI TestClient to call endpoints in-process.
+pytest==8.3.4
+httpx==0.28.1

@@ -1,5 +1,5 @@
 # =============================================================================
-# File: app/seed.py
+# File: app/sample_data_seeder.py
 # Purpose: Fills an empty database with sample data on startup, so the
 #          dashboard has Upcoming and Recent meetings to show.
 # Contains:
@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import (
+from app.database_models import (
     Meeting,
     MeetingStatus,
     MeetingType,

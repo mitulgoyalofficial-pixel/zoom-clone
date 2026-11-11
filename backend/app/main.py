@@ -2,29 +2,28 @@
 # File: app/main.py
 # Purpose: Entry point of the backend. Creates the FastAPI app.
 # Contains:
-#   - .env loading (FRONTEND_URL, DATABASE_URL)
+#   - .env loading (FRONTEND_URL, DATABASE_URL) and router registration
 #   - lifespan(): startup work - create tables and seed sample data
 #   - CORS setup so the Next.js frontend (other origin) can call the API
 #   - health_check(): GET /api/health to confirm the server is up
 # Run locally (from backend/):  uvicorn app.main:app --reload
 # =============================================================================
 
-import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 
-# Must run before importing app.database, which reads DATABASE_URL at import time.
+# Must run before importing app.database_connection, which reads DATABASE_URL at import time.
 load_dotenv()
 
 from fastapi import FastAPI  # noqa: E402  (imports must come after load_dotenv)
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
-from app import models  # noqa: E402,F401  (import registers the tables on Base.metadata)
-from app.database import Base, SessionLocal, engine  # noqa: E402
-from app.seed import seed_database_if_empty  # noqa: E402
-
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+from app import database_models  # noqa: E402,F401  (import registers the tables on Base.metadata)
+from app.app_settings import FRONTEND_URL  # noqa: E402
+from app.database_connection import Base, SessionLocal, engine  # noqa: E402
+from app.routers import current_user_router, meetings_router  # noqa: E402
+from app.sample_data_seeder import seed_database_if_empty  # noqa: E402
 
 
 # Purpose: Prepare the database once when the server starts.
@@ -50,6 +49,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(current_user_router.router)
+app.include_router(meetings_router.router)
 
 
 # Purpose: Let us (and the host) check the server is running.
