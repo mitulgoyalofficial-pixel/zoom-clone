@@ -9,14 +9,19 @@
 #   - MeetingPublicResponse: what anyone who knows a meeting ID may see
 #   - MeetingHostResponse: public fields + passcode + invite link, only for
 #                          the host's own dashboard lists
+#   - ScheduleMeetingRequest: body of the Schedule form (POST .../schedule)
+#   - JoinMeetingRequest, ParticipantResponse, ParticipantListResponse: join flow
 # =============================================================================
 
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, PlainSerializer
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
-from app.database_models import MeetingStatus, MeetingType
+from app.database_models import MeetingStatus, MeetingType, ParticipantRole
+
+# Zoom's own limit for one meeting is 24 hours.
+MAX_DURATION_MINUTES = 24 * 60
 
 # Times are stored as naive UTC. Without the "Z" suffix the browser's
 # new Date() would read them as LOCAL time and show the wrong hour.
@@ -59,3 +64,58 @@ class MeetingPublicResponse(BaseModel):
 class MeetingHostResponse(MeetingPublicResponse):
     passcode: str | None
     invite_link: str
+
+
+# Purpose: Body of POST /api/meetings/schedule (the Schedule form).
+# Fields:
+#   title            - required, 1-200 characters (spaces around it are trimmed)
+#   description      - optional text
+#   scheduled_start  - ISO date-time; with a timezone ("...Z" or "+05:30") or,
+#                      if none is given, taken as UTC
+#   duration_minutes - 1 to 1440
+#   has_passcode     - Zoom's "Passcode" checkbox; on by default
+class ScheduleMeetingRequest(BaseModel):
+    # Trims spaces so a title of only spaces is rejected by min_length.
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    title: str = Field(min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    scheduled_start: datetime
+    duration_minutes: int = Field(ge=1, le=MAX_DURATION_MINUTES)
+    has_passcode: bool = True
+
+
+# Purpose: Body of POST /api/meetings/{code}/join (the pre-join screen).
+# Fields:
+#   display_name - name shown to others, 1-100 characters (trimmed)
+#   passcode     - what the guest typed; not needed for the host, or when the
+#                  invite link already carried ?pwd=
+#   as_host      - true only when the host starts their own meeting
+class JoinMeetingRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    display_name: str = Field(min_length=1, max_length=100)
+    passcode: str | None = None
+    as_host: bool = False
+
+
+# Purpose: One person in a meeting, as shown in the participants panel.
+class ParticipantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    display_name: str
+    role: ParticipantRole
+    is_muted: bool
+    joined_at: UtcDatetime
+
+
+# Purpose: Answer of the participants poll (GET .../participants).
+# Fields:
+#   meeting_status - "ended" tells everyone the host has left
+#   participants   - people currently in the meeting, in join order
+#   was_removed    - true if the asking participant was removed by the host
+class ParticipantListResponse(BaseModel):
+    meeting_status: MeetingStatus
+    participants: list[ParticipantResponse]
+    was_removed: bool

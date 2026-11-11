@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from app import database_models  # noqa: E402,F401  (import registers the tables on Base.metadata)
 from app.app_settings import FRONTEND_URL  # noqa: E402
 from app.database_connection import Base, SessionLocal, engine  # noqa: E402
-from app.routers import current_user_router, meetings_router  # noqa: E402
+from app.routers import current_user_router, meetings_router, participants_router  # noqa: E402
 from app.sample_data_seeder import seed_database_if_empty  # noqa: E402
 
 
@@ -52,6 +52,7 @@ app.add_middleware(
 
 app.include_router(current_user_router.router)
 app.include_router(meetings_router.router)
+app.include_router(participants_router.router)
 
 
 # Purpose: Let us (and the host) check the server is running.

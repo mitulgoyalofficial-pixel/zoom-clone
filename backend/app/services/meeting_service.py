@@ -5,6 +5,7 @@
 #          the only place that decides how meetings are created/found/built.
 # Contains:
 #   - generate_meeting_code(), generate_passcode(): new meeting credentials
+#   - create_instant_meeting(), create_scheduled_meeting(): make new meetings
 #   - normalize_meeting_code(): "123 4567 8901" -> "12345678901"
 #   - fetch_meeting_by_code(), fetch_upcoming_meetings(), fetch_recent_meetings()
 #   - calculate_scheduled_end_time(), build_invite_link()
@@ -13,18 +14,21 @@
 
 import secrets
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.api_schemas import MeetingHostResponse, MeetingPublicResponse
+from app.api_schemas import MeetingHostResponse, MeetingPublicResponse, ScheduleMeetingRequest
 from app.app_settings import FRONTEND_URL
-from app.database_models import Meeting, MeetingStatus, MeetingType, current_utc_time
+from app.database_models import Meeting, MeetingStatus, MeetingType, User, current_utc_time
+from app.services.meeting_errors import InvalidMeetingRequestError
 
 # Letters + digits, like Zoom passcodes (e.g. "aB3xY9").
 PASSCODE_ALPHABET = string.ascii_letters + string.digits
 RECENT_MEETINGS_LIMIT = 20
+# A time picker only has minute precision, so "right now" is often a few seconds in the past.
+START_TIME_GRACE_MINUTES = 5
 
 
 # Purpose: Create a meeting ID that no other meeting uses.
@@ -52,6 +56,64 @@ def generate_meeting_code(db: Session) -> str:
 def generate_passcode() -> str:
     # `secrets` (not `random`) because a passcode must not be predictable.
     return "".join(secrets.choice(PASSCODE_ALPHABET) for _ in range(6))
+
+
+# Purpose: Convert any date-time into the form we store: naive UTC.
+# Input:   moment - with a timezone (converted to UTC) or without one
+# Output:  datetime in UTC with no tzinfo
+def convert_to_naive_utc(moment: datetime) -> datetime:
+    # No timezone given: assume the caller already meant UTC.
+    if moment.tzinfo is None:
+        return moment
+    return moment.astimezone(timezone.utc).replace(tzinfo=None)
+
+
+# Purpose: Start a meeting right now ("New Meeting" button).
+# Input:   db - open session; host - the user starting it
+# Output:  the saved Meeting: type instant, status live, started now, with a passcode
+# How it works: title is "<name>'s Zoom Meeting" like Zoom; commits immediately.
+def create_instant_meeting(db: Session, host: User) -> Meeting:
+    meeting = Meeting(
+        meeting_code=generate_meeting_code(db),
+        title=f"{host.name}'s Zoom Meeting",
+        host=host,
+        meeting_type=MeetingType.instant,
+        # Live straight away: the host is about to enter the room.
+        status=MeetingStatus.live,
+        started_at=current_utc_time(),
+        passcode=generate_passcode(),
+    )
+    db.add(meeting)
+    db.commit()
+    return meeting
+
+
+# Purpose: Save a meeting scheduled for later (Schedule form).
+# Input:   db - open session; host - the user scheduling it;
+#          request - validated form data (title, description, start, duration, passcode flag)
+# Output:  the saved Meeting with status scheduled
+# Errors:  InvalidMeetingRequestError if the start time is in the past
+def create_scheduled_meeting(db: Session, host: User, request: ScheduleMeetingRequest) -> Meeting:
+    start_time = convert_to_naive_utc(request.scheduled_start)
+    earliest_allowed_start = current_utc_time() - timedelta(minutes=START_TIME_GRACE_MINUTES)
+    if start_time < earliest_allowed_start:
+        raise InvalidMeetingRequestError("The meeting start time is in the past. Pick a time from now onwards.")
+
+    meeting = Meeting(
+        meeting_code=generate_meeting_code(db),
+        title=request.title,
+        description=request.description,
+        host=host,
+        meeting_type=MeetingType.scheduled,
+        scheduled_start=start_time,
+        duration_minutes=request.duration_minutes,
+        # NULL passcode means "no passcode required" (checkbox unticked).
+        passcode=generate_passcode() if request.has_passcode else None,
+        status=MeetingStatus.scheduled,
+    )
+    db.add(meeting)
+    db.commit()
+    return meeting
 
 
 # Purpose: Turn what a user typed or pasted into a bare meeting code.
