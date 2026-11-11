@@ -527,6 +527,9 @@ Each component lives in `frontend/components/`.
 - Default avatar colour: purple `#A94BC0` (seed changed).
 - Schedule form scope: functional / visual-only / skip tiers (section 3.2); native date input + two selects; passcode
   checkbox plus read-only "Generated when you save" field.
+- Join page (`/join`), pre-join (`/join/[code]`) and room (`/room/[code]`) are built. Pre-join and the participants panel are
+  our own design (no Zoom screenshot); the launch page "Join from Zoom Workplace app" is skipped; host "Leave Meeting" and
+  "End Meeting for All" both call leave (the host leaving ends the meeting). Questions 22-25 were decided as recommended.
 - Dashboard built from this analysis; verified against the reference at 1536 CSS px wide / 1.25 scale (see components/).
 
 ## 6. Change log

@@ -123,9 +123,19 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
   meeting pages without it; components/; hooks/useApiData.ts (loading/error/data hook); lib/apiClient.ts,
   lib/apiTypes.ts, lib/formatters.ts.
 - Routes: `/` dashboard, `/meeting` meetings list (built), `/meeting/schedule` schedule form (built),
-  `/join` join by ID (to build),
-  `/join/[code]` pre-join (invite-link target; `?host=1` = join as host, `?pwd=` = passcode),
-  `/meeting/[code]` meeting details page like Zoom's zoom.us/meeting/{id} (built), `/room/[code]` live room (to build; proposed).
+  `/join` join by ID or invite link (built, light shell in app/(simple)/),
+  `/join/[code]` pre-join with camera preview (built; invite-link target; `?host=1` = join as host, `?pwd=` = passcode),
+  `/meeting/[code]` meeting details page like Zoom's zoom.us/meeting/{id} (built), `/room/[code]` live room (built, full-screen, app/(meeting)/).
+- Room flow: pre-join calls join and stores {participantId, name, role, camera} in sessionStorage
+  (lib/meetingSession.ts, per tab); the room reads it (no session = redirect to pre-join), polls
+  GET .../participants every 3 s, and shows full-screen notices for removed / ended / disconnected.
+  MeetingRoom is keyed on useRouter().bfcacheId so a fresh visit never reuses a hidden room's stale session.
+  Guests send leave with navigator.sendBeacon on pagehide/popstate; the host does NOT (a reload would end the meeting).
+- Effects: the first poll uses setTimeout(fn, 0) because the lint rule react-hooks/set-state-in-effect rejects
+  calling a state-setting function inline in an effect body.
+- Browser checks were done with a scratch script that drives headless Chrome through the DevTools protocol
+  (Node's built-in WebSocket/fetch, no new dependency), using --use-fake-device-for-media-stream for the camera.
+  It lives outside the repo; the manual path is: run both servers, then click through the flows.
 - Pages that depend on "now" (today's date, next half hour) must render those parts only in the browser
   (hooks/useIsClient.ts), otherwise the build-time value is frozen into the prerendered page.
 - Components that call usePathname/useParams/useSearchParams need a <Suspense> boundary on dynamic routes

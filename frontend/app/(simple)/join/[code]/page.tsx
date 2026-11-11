@@ -1,8 +1,7 @@
 // =============================================================================
-// File: app/(meeting)/join/[code]/page.tsx
+// File: app/(simple)/join/[code]/page.tsx
 // Purpose: The route /join/{meeting code}: the pre-join screen, also the target of invite links.
-// Note: the "(meeting)" route group has no website shell (no navbar/sidebar), like Zoom's
-//       full-screen meeting pages.
+// Note: it lives in the "(simple)" route group, the same light shell as the Join page (/join).
 //       <Suspense> is REQUIRED here: with Cache Components, useParams/useSearchParams
 //       inside PreJoinScreen are only known at request time, and the build fails
 //       without a Suspense boundary around them (see the Next.js docs for useParams).
