@@ -72,7 +72,9 @@ Decisions:
 
 Seeding:
 - Tables are created and seeded on startup if empty (hosting disk is ephemeral).
-- Seed dates are relative to now (e.g. "tomorrow 10:00", "2 days ago") so Upcoming never goes stale.
+- Seed dates are relative to now (e.g. "tomorrow 10:00", "2 days ago"). Because the deployed Postgres keeps
+  its data, startup also calls refresh_sample_upcoming_meetings_if_none(): when the default user has no
+  upcoming meeting left, the three sample ones are added again with fresh dates.
 - Seed 4-5 users (default user + colleagues) and past meetings whose participants are those users,
   so the users -> participants relationship is visible in the demo.
 

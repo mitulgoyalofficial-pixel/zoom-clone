@@ -4,11 +4,14 @@
 #          dashboard has Upcoming and Recent meetings to show.
 # Contains:
 #   - seed_database_if_empty(): entry point called from main.py
+#   - refresh_sample_upcoming_meetings_if_none(): keeps "Upcoming" from going empty
+#   - add_sample_upcoming_meetings(): the three sample scheduled meetings
 #   - helpers to create scheduled and past meetings
 # Data created: 5 users (id=1 is the default "logged in" user),
 #   3 upcoming scheduled meetings, 3 past meetings with participants.
-# Key point: all dates are relative to "now", because the hosting disk is
-#   wiped on every deploy; fixed dates would make "Upcoming" empty in days.
+# Key point: all dates are relative to "now". The database keeps its data (Postgres in
+#   production), so the sample upcoming meetings slowly move into the past; when none are
+#   left, startup adds them again with fresh dates (refresh_sample_upcoming_meetings_if_none).
 # =============================================================================
 
 from datetime import datetime, timedelta
@@ -25,7 +28,8 @@ from app.database_models import (
     User,
     current_utc_time,
 )
-from app.services.meeting_service import generate_meeting_code, generate_passcode
+from app.app_settings import DEFAULT_USER_ID
+from app.services.meeting_service import fetch_upcoming_meetings, generate_meeting_code, generate_passcode
 
 
 # Purpose: Make seeded start times look like real ones (10:00, 10:30...).
@@ -110,6 +114,35 @@ def add_past_meeting(db: Session, host: User, title: str, meeting_type: MeetingT
     return meeting
 
 
+# Purpose: Insert the three sample scheduled meetings for a host (shown in "Upcoming").
+# Input:   db - open session; host - the user who hosts them
+# Output:  None (flushes, the caller commits)
+# How it works: start times count from the next half hour, so they are always in the future.
+def add_sample_upcoming_meetings(db: Session, host: User) -> None:
+    soon = round_up_to_next_half_hour(current_utc_time())
+    add_scheduled_meeting(db, host, "Sprint Planning",
+                          "Plan stories and estimates for the next sprint.",
+                          soon + timedelta(hours=2), 60)
+    add_scheduled_meeting(db, host, "Design Review",
+                          "Walk through the new dashboard mockups.",
+                          soon + timedelta(days=1), 45)
+    add_scheduled_meeting(db, host, "1:1 with Priya", None,
+                          soon + timedelta(days=3), 30)
+
+
+# Purpose: Keep the dashboard's "Upcoming" section from going empty on a long-running deployment.
+# Input:   db - open session
+# Output:  None (commits only when it adds meetings)
+# How it works: if the default user has no upcoming meeting at all, the three sample ones are
+#   added again with fresh dates. If at least one upcoming meeting exists, nothing happens.
+def refresh_sample_upcoming_meetings_if_none(db: Session) -> None:
+    host = db.get(User, DEFAULT_USER_ID)
+    if host is None or fetch_upcoming_meetings(db, host.id):
+        return
+    add_sample_upcoming_meetings(db, host)
+    db.commit()
+
+
 # Purpose: Entry point: insert all sample data, but only into an empty DB.
 # Input:   db - open database session
 # Output:  None (commits the sample data)
@@ -131,17 +164,9 @@ def seed_database_if_empty(db: Session) -> None:
     db.flush()
 
     now = current_utc_time()
-    soon = round_up_to_next_half_hour(now)
 
     # Upcoming (scheduled, in the future)
-    add_scheduled_meeting(db, me, "Sprint Planning",
-                          "Plan stories and estimates for the next sprint.",
-                          soon + timedelta(hours=2), 60)
-    add_scheduled_meeting(db, me, "Design Review",
-                          "Walk through the new dashboard mockups.",
-                          soon + timedelta(days=1), 45)
-    add_scheduled_meeting(db, me, "1:1 with Priya", None,
-                          soon + timedelta(days=3), 30)
+    add_sample_upcoming_meetings(db, me)
 
     # Recent (already happened)
     add_past_meeting(db, me, "Mitul Goyal's Zoom Meeting", MeetingType.instant,

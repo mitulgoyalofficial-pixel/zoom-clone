@@ -29,7 +29,10 @@ from app import database_models  # noqa: E402,F401  (import registers the tables
 from app.app_settings import FRONTEND_URL  # noqa: E402
 from app.database_connection import Base, SessionLocal, engine, get_db_session  # noqa: E402
 from app.routers import current_user_router, meetings_router, participants_router  # noqa: E402
-from app.sample_data_seeder import seed_database_if_empty  # noqa: E402
+from app.sample_data_seeder import (  # noqa: E402
+    refresh_sample_upcoming_meetings_if_none,
+    seed_database_if_empty,
+)
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -37,7 +40,8 @@ logger = logging.getLogger("uvicorn.error")
 # Purpose: Make sure the tables exist and hold the sample data.
 # Input:   none
 # Output:  none
-# How it works: creates any missing tables, then seeds them if empty. On a serverless host several
+# How it works: creates any missing tables, seeds them if empty, and re-adds the sample upcoming
+#   meetings when none are left (the data persists, so they drift into the past). On a serverless host several
 #   instances can start at the same moment and both try to create or fill the tables; the loser of
 #   that race gets a duplicate error. That is harmless (the winner finished the job), so it is
 #   logged and ignored instead of crashing the instance.
@@ -46,6 +50,7 @@ def prepare_database() -> None:
         Base.metadata.create_all(bind=engine)
         with SessionLocal() as db:
             seed_database_if_empty(db)
+            refresh_sample_upcoming_meetings_if_none(db)
     except SQLAlchemyError:
         logger.exception("Database setup hit an error (another instance may have finished it first)")
 
