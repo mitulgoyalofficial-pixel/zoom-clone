@@ -114,6 +114,8 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
   passcode behaviour), plus an ER diagram and table descriptions (DB design is graded).
 
 ## UI rules
+- Detailed visual analysis of each Zoom screen (tokens, layout, components) lives in
+  docs/zoom-design-analysis.md. Read it before building any UI; screenshots are in design-ref/ (not committed).
 - Match Zoom closely: Zoom blue #0B5CFF, orange New Meeting tile, white dashboard,
   dark meeting room, rounded tiles, Inter-like sans font, lucide-react icons.
 - Reusable components in frontend/components/ (Navbar, ActionTile, MeetingCard, Modal,
