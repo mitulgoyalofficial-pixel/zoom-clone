@@ -1,26 +1,53 @@
+/* =============================================================================
+   File: app/globals.css
+   Purpose: Tailwind setup and the Zoom design tokens (colours, font, radius, shadow).
+            Every value comes from docs/zoom-design-analysis.md (section 1).
+   How to use: tokens become Tailwind classes, e.g. --color-zoom-blue -> bg-zoom-blue,
+               text-zoom-blue; --radius-card -> rounded-card; --shadow-card -> shadow-card.
+   ============================================================================= */
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Brand and action colours */
+  --color-zoom-blue: #0b5cff;
+  --color-zoom-orange: #f5732a;
+  --color-avatar-purple: #a94bc0;
+
+  /* Surfaces */
+  --color-utility-bar: #05050f;
+  --color-sidebar: #f5f6fa;
+  --color-sidebar-active: #ebf0fa;
+  --color-soft: #f2f4fa; /* soft buttons, empty-state boxes, info bars */
+  --color-footer: #3b3b4f;
+
+  /* Text and lines */
+  --color-ink: #232333;
+  --color-ink-muted: #6b6f80;
+  --color-line: #e4e7ee;
+  --color-input-border: #cdd1db;
+  --color-disabled: #b8bcc8;
+
+  /* Notice box (amber warning) and small badges */
+  --color-notice-bg: #fff9f0;
+  --color-notice-border: #f0d3a8;
+  --color-badge-new: #e6eeff;
+
+  /* Shape */
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --shadow-card: 0 2px 10px rgb(0 0 0 / 0.08);
 }
 
+/* "inline" because the value points at a CSS variable that next/font sets at runtime (see layout.tsx). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* Base size 16px (analysis section 1). */
+  font-size: 16px;
 }

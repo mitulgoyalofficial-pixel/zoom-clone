@@ -113,13 +113,32 @@ DELETE /api/meetings/{code}/participants/{id}?host_participant_id=  (host remove
 - README: setup instructions, tech stack, assumptions (no auth, no real video, host/guest rule,
   passcode behaviour), plus an ER diagram and table descriptions (DB design is graded).
 
+## Frontend structure and running
+- Run both: backend `venv\Scripts\python -m uvicorn app.main:app --port 8000` (from backend/), frontend
+  `npm run dev` (from frontend/, port 3000: the backend only allows FRONTEND_URL=http://localhost:3000 for CORS).
+  frontend/.env.local (git-ignored) needs NEXT_PUBLIC_API_URL=http://localhost:8000.
+- Folders: app/(site)/ = pages with the Zoom website shell (navbar, sidebar); app/(meeting)/ = full-screen
+  meeting pages without it; components/; hooks/useApiData.ts (loading/error/data hook); lib/apiClient.ts,
+  lib/apiTypes.ts, lib/formatters.ts.
+- Routes: `/` dashboard, `/meeting/schedule` schedule form (to build), `/join` join by ID (to build),
+  `/join/[code]` pre-join (invite-link target; `?host=1` = join as host, `?pwd=` = passcode), `/meeting/[code]` room (to build).
+- Next.js 16 notes (read node_modules/next/dist/docs before using unfamiliar APIs): next.config has
+  cacheComponents + partialPrefetching. useParams / useSearchParams must be inside a <Suspense> boundary or the
+  build fails. Navigation keeps old routes mounted but hidden: effects re-run when a page is shown again
+  (so lists refresh), but component state (e.g. a half-filled form) is preserved.
+- Visual checks: headless Chrome screenshot, e.g. `chrome --headless=new --window-size=1536,900
+  --force-device-scale-factor=1.25 --virtual-time-budget=10000 --screenshot=out.png <url>` (matches the
+  user's laptop: 1536 CSS px at 125%).
+- Stopping background servers: killing the task wrapper can leave node/uvicorn running on the port; check with
+  `netstat -ano | grep LISTENING` and `taskkill //PID <pid> //F`.
+
 ## UI rules
 - Detailed visual analysis of each Zoom screen (tokens, layout, components) lives in
   docs/zoom-design-analysis.md. Read it before building any UI; screenshots are in design-ref/ (not committed).
 - Match Zoom closely: Zoom blue #0B5CFF, orange New Meeting tile, white dashboard,
   dark meeting room, rounded tiles, Inter-like sans font, lucide-react icons.
 - Reusable components in frontend/components/ (Navbar, ActionTile, MeetingCard, Modal,
-  ControlBarButton, ParticipantTile). API calls only in frontend/lib/api.ts.
+  ControlBarButton, ParticipantTile). API calls only in frontend/lib/apiClient.ts (types in lib/apiTypes.ts).
 
 ## Commenting rules (apply to every file, backend and frontend)
 - File header: a comment block at the top with File, Purpose, and what it Contains.

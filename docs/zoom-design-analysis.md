@@ -301,9 +301,19 @@ Each component lives in `frontend/components/`.
     Copy invitation, Edit, Delete), (b) the Meetings list page (zoom.us/meeting, Upcoming tab) that "Visit Meetings"
     opens, (c) the time dropdown, duration dropdown and date picker open.
 
+### Decisions taken while building (recommended options, change if you disagree)
+- Sidebar: full static product list. Tile label: "New Meeting". Promo card and footer: skipped.
+- Personal Meeting ID and Booking links: static placeholders (sample ID, not a real one).
+- Default avatar colour: purple `#A94BC0` (seed changed).
+- Schedule form scope: functional / visual-only / skip tiers (section 3.2); native date input + two selects; passcode
+  checkbox plus read-only "Generated when you save" field.
+- Dashboard built from this analysis; verified against the reference at 1536 CSS px wide / 1.25 scale (see components/).
+
 ## 6. Change log
 - Created empty template.
 - Added global tokens, layout and full dashboard analysis from 4 screenshots (3 dashboard scroll positions + 1 network tab).
 - Added schedule form analysis (screens 6-9: 4 screenshots), form tokens, component rows, open questions 8-11,
   and the nav hover note (user-reported).
 - A 5th screenshot (dashboard at browser zoom 100%) was identical to the first: no value changed. Scale check done: devicePixelRatio = 1.25, assumption confirmed.
+- Dashboard built in the frontend (shell, quick actions, Upcoming, Recent). Fixed: nowrap on tile labels, sidebar group indent,
+  logo size, FAB offset, sidebar spacing after side-by-side comparison with the screenshot.

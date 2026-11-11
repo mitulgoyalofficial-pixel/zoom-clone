@@ -121,7 +121,8 @@ def seed_database_if_empty(db: Session) -> None:
         return
 
     # Inserted first, so it gets id=1: the default "logged in" user.
-    me = User(name="Mitul Goyal", email="mitul.goyal@example.com", avatar_color="#0B5CFF")
+    # Purple like the default Zoom avatar in the reference screenshots.
+    me = User(name="Mitul Goyal", email="mitul.goyal@example.com", avatar_color="#A94BC0")
     priya = User(name="Priya Sharma", email="priya.sharma@example.com", avatar_color="#E8590C")
     rahul = User(name="Rahul Verma", email="rahul.verma@example.com", avatar_color="#2F9E44")
     ananya = User(name="Ananya Iyer", email="ananya.iyer@example.com", avatar_color="#AE3EC9")
